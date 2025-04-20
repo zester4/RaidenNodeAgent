@@ -21,6 +21,8 @@
     "date-fns": "*",
     "node-fetch": "*",
     "zod": "*",
-    "@stdlib/stdlib": "*"
+    "@stdlib/stdlib": "*",
+    "nodemailer": "*",
+    "@octokit/rest": "*"
   }
 }
