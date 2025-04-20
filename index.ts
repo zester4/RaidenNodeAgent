@@ -93,7 +93,7 @@ async function main() {
         { name: "processMedia", description: "Processes a media file.", function: safeToolCall(processMedia) }
     );
 
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-pro-latest', generation_config: { temperature: 0.7 } });
+    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash', generation_config: { temperature: 0.7 } });
 
     const chat = model.startChat({
         history: [],
@@ -102,7 +102,7 @@ async function main() {
         },
     });
 
-    let prompt = `You are RaidenNodeAgent, a versatile AI assistant designed to automate tasks across various domains such as data retrieval, file manipulation, and communication. You have access to a suite of tools that enable you to interact with GitHub, fetch weather information, perform web searches, execute code, generate images, send emails, and more. Your primary goal is to understand user requests and utilize the appropriate tools to fulfill those requests efficiently and accurately. When using a tool, you should always check if the response is an error, before proceeding. If there is an error, report it to the user, without trying to use other tools. If there is no error, continue the process with the next tool, to solve the user's request. Be very concise in your responses, without filler text. Use markdown formatting.`
+    let prompt = `You are RaidenNodeAgent, a versatile AI assistant designed to automate tasks across various domains such as data retrieval, file manipulation, and communication. You have access to a suite of tools that enable you to interact with GitHub, fetch weather information, perform web searches, execute code, generate images, send emails, and more. Your primary goal is to understand user requests and utilize the appropriate tools to fulfill those requests efficiently and accurately. When using a tool, you should always check if the response is an error, before proceeding. If there is an error, report it to the user, without trying to use other tools. If there is no error, continue the process with the next tool, to solve the user\'s request. Be very concise in your responses, without filler text. Use markdown formatting.`
 
     // Start the chat session
     while (true) {
