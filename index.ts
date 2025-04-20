@@ -19,6 +19,7 @@ import { analyzeImage } from './imageRecognitionTools'
 import { scrapeWebsite } from './webScrapingTools'
 import { pdfManipulate } from './pdfTools'
 import { spreadsheetManipulate } from './spreadsheetTools'
+import { addToVectorDB, queryVectorDB, semanticCacheGet, semanticCacheSet } from './vectorDBTools'
 
 // Load environment variables
 require('dotenv').config();
@@ -52,7 +53,7 @@ async function main() {
         responseMimeType: 'text/plain',
         systemInstruction: [
             {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets!`,        
+                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets. You also have a powerful memory, you can store to the database and retrieve from it. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets!`,        
             }
         ],
     };
@@ -210,6 +211,25 @@ async function main() {
                 const data = args.data
                 const spreadsheetResult = await spreadsheetManipulate(operation, filePath, data)
                 console.log(spreadsheetResult)
+            } else if (functionName === 'addToVectorDB') {
+                const text = args.text
+                const vectorId = args.vectorId
+                const addResult = await addToVectorDB(text, vectorId)
+                console.log(addResult)
+            } else if (functionName === 'queryVectorDB') {
+                const query = args.query
+                const topK = args.topK
+                const queryResult = await queryVectorDB(query, topK)
+                console.log(queryResult)
+            }else if (functionName === 'semanticCacheGet') {
+                const key = args.key
+                const getResult = await semanticCacheGet(key)
+                console.log(getResult)
+            } else if (functionName === 'semanticCacheSet') {
+                const key = args.key
+                const value = args.value
+                const setResult = await semanticCacheSet(key, value)
+                console.log(setResult)
             } else {
                 console.log(`Unknown function: ${functionName}`);
             }
