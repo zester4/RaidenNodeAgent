@@ -1,0 +1,11 @@
+{
+  "name": "raiden-node-agent",
+  "version": "1.0.0",
+  "description": "Node.js-based AI agent for business automation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Raiden Agents",
+  "license": "MIT"
+}
