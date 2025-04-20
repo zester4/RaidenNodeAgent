@@ -39,11 +39,36 @@ async function main() {
         apiKey: apiKey,
     });
 
-     // Dynamically load tool configurations from the 'tools' directory
-     const toolsDir = path.join(__dirname, 'tools');
-     const toolFiles = fs.readdirSync(toolsDir).filter(file => file.endsWith('.ts'));
+    const toolsDir = path.join(__dirname, 'tools');
+    const toolFiles = fs.readdirSync(toolsDir).filter(file => file.endsWith('.ts'));
 
-    const tools = [
+    const tools = [];
+
+    // Dynamically load tool configurations from the 'tools' directory
+    for (const file of toolFiles) {
+        try {
+            const modulePath = path.join(toolsDir, file);
+            const toolModule = await import(modulePath);
+
+            // Check if the module has a default export that is a tool definition
+            if (toolModule.default && typeof toolModule.default === 'object' &&
+                toolModule.default.name && toolModule.default.description && toolModule.default.function) {
+
+                tools.push({
+                    name: toolModule.default.name,
+                    description: toolModule.default.description,
+                    function: toolModule.default.function
+                });
+            } else {
+                console.warn(`Tool module ${file} does not have a valid default export.`);
+            }
+        } catch (error) {
+            console.error(`Error loading tool module ${file}:`, error);
+        }
+    }
+
+     //Add functions from the current file (index.ts) to the tools
+     tools.push(
         {name: "listRepos", description: "Lists your repositories.", function: listRepos},
         {name: "getRepo", description: "Gets a specific repository.", function: getRepo},
         {name: "listFiles", description: "Lists files in a repository.", function: listFiles},
@@ -73,7 +98,7 @@ async function main() {
         {name: "semanticCacheGet", description: "Retrieves data from the semantic cache.", function: semanticCacheGet},
         {name: "semanticCacheSet", description: "Stores data in the semantic cache.", function: semanticCacheSet},
         {name: "processMedia", description: "Processes media files.", function: processMedia}
-    ];
+    );
 
     const config = {
         tools,
