@@ -1,6 +1,8 @@
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 const stdlib = require( '@stdlib/stdlib' );
+import fs from 'fs';
+import path from 'path';
 
 // Import tool modules
 import { listRepos, getRepo, listFiles, readGithubFile, createRepo, createFile, updateFile, deleteFile, createIssue, closeIssue } from './githubTools';
@@ -12,11 +14,11 @@ import { readFile, writeFile } from './fileTools';
 import { executeCode } from './codeExecutionTools';
 import { generateImage } from './imageGenerationTools';
 import { sendEmail } from './emailTools';
-import { tools } from './toolsConfig';
 import { executeSqlQuery } from './sqlQueryTools'
 import { analyzeImage } from './imageRecognitionTools'
 import { scrapeWebsite } from './webScrapingTools'
 import { pdfManipulate } from './pdfTools'
+import { spreadsheetManipulate } from './spreadsheetTools'
 
 // Load environment variables
 require('dotenv').config();
@@ -35,12 +37,22 @@ async function main() {
         apiKey: apiKey,
     });
 
+     // Dynamically load tool configurations from the 'tools' directory
+     const toolsDir = path.join(__dirname, 'tools');
+     const toolFiles = fs.readdirSync(toolsDir).filter(file => file.endsWith('.ts'));
+
+     const tools = [];
+     for (const file of toolFiles) {
+         const toolConfig = await import(path.join(toolsDir, file));
+         tools.push(toolConfig.default);
+     }
+
     const config = {
         tools,
         responseMimeType: 'text/plain',
         systemInstruction: [
             {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites and manipulate pdfs. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs!`,        
+                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets!`,        
             }
         ],
     };
@@ -192,7 +204,13 @@ async function main() {
                 const text = args.text
                 const pdfResult = await pdfManipulate(operation, filePath, text)
                 console.log(pdfResult)
-            }else {
+            } else if (functionName === 'spreadsheetManipulate') {
+                const operation = args.operation
+                const filePath = args.filePath
+                const data = args.data
+                const spreadsheetResult = await spreadsheetManipulate(operation, filePath, data)
+                console.log(spreadsheetResult)
+            } else {
                 console.log(`Unknown function: ${functionName}`);
             }
         }
