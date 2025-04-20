@@ -29,6 +29,10 @@
     "@mendable/firecrawl-js": "*",
     "pdf-lib": "*",
     "csv-parser": "*",
-    "csv-stringify": "*"
+    "csv-stringify": "*",
+    "@upstash/vector": "*",
+    "@upstash/redis": "*",
+    "@upstash/semantic-cache": "*",
+    "sentence-transformers": "*"
   }
 }
