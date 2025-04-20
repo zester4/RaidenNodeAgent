@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
-const stdlib = require( '@stdlib/stdlib' );
+const stdlib = require('@stdlib/stdlib');
 import fs from 'fs';
 import path from 'path';
 
@@ -24,36 +24,29 @@ import { processMedia } from './mediaTools'
 
 // Load environment variables
 require('dotenv').config();
-
 const apiKey = process.env.GEMINI_API_KEY;
-
 if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not set in .env file.');
 }
 
-// Zod schema for owner and repo
-const ownerRepoSchema = z.string().min(1);
+// Zod schema for owner and repoconst ownerRepoSchema = z.string().min(1);
 
 async function main() {
     const ai = new GoogleGenAI({
         apiKey: apiKey,
     });
-
     const toolsDir = path.join(__dirname, 'tools');
     const toolFiles = fs.readdirSync(toolsDir).filter(file => file.endsWith('.ts'));
-
-    const tools = [];
+    const tools: any[] = [];
 
     // Dynamically load tool configurations from the 'tools' directory
     for (const file of toolFiles) {
         try {
             const modulePath = path.join(toolsDir, file);
             const toolModule = await import(modulePath);
-
             // Check if the module has a default export that is a tool definition
             if (toolModule.default && typeof toolModule.default === 'object' &&
                 toolModule.default.name && toolModule.default.description && toolModule.default.function) {
-
                 tools.push({
                     name: toolModule.default.name,
                     description: toolModule.default.description,
@@ -67,92 +60,100 @@ async function main() {
         }
     }
 
-     //Add functions from the current file (index.ts) to the tools
-     tools.push(
-        {name: "listRepos", description: "Lists your repositories.", function: listRepos},
-        {name: "getRepo", description: "Gets a specific repository.", function: getRepo},
-        {name: "listFiles", description: "Lists files in a repository.", function: listFiles},
-        {name: "readGithubFile", description: "Reads a file from Github.", function: readGithubFile},
-        {name: "createRepo", description: "Creates a new repository.", function: createRepo},
-        {name: "createFile", description: "Creates a new file in a repository.", function: createFile},
-        {name: "updateFile", description: "Updates a file in a repository.", function: updateFile},
-        {name: "deleteFile", description: "Deletes a file from a repository.", function: deleteFile},
-        {name: "createIssue", description: "Creates a new issue in a repository.", function: createIssue},
-        {name: "closeIssue", description: "Closes an issue in a repository.", function: closeIssue},
-        {name: "getWeather", description: "Gets the weather for a location.", function: getWeather},
-        {name: "getDateTime", description: "Gets the current date and time for a timezone.", function: getDateTime},
-        {name: "webSearch", description: "Performs a web search.", function: webSearch},
-        {name: "advancedCalculation", description: "Performs an advanced calculation.", function: advancedCalculation},
-        {name: "readFile", description: "Reads a file from the file system.", function: readFile},
-        {name: "writeFile", description: "Writes a file to the file system.", function: writeFile},
-        {name: "executeCode", description: "Executes code.", function: executeCode},
-        {name: "generateImage", description: "Generates an image based on a prompt.", function: generateImage},
-        {name: "sendEmail", description: "Sends an email.", function: sendEmail},
-        {name: "executeSqlQuery", description: "Executes an SQL query.", function: executeSqlQuery},
-        {name: "analyzeImage", description: "Analyzes an image.", function: analyzeImage},
-        {name: "scrapeWebsite", description: "Scrapes a website.", function: scrapeWebsite},
-        {name: "pdfManipulate", description: "Manipulates a PDF file.", function: pdfManipulate},
-        {name: "spreadsheetManipulate", description: "Manipulates a spreadsheet.", function: spreadsheetManipulate},
-        {name: "addToVectorDB", description: "Adds text to the vector database.", function: addToVectorDB},
-        {name: "queryVectorDB", description: "Queries the vector database.", function: queryVectorDB},
-        {name: "semanticCacheGet", description: "Retrieves data from the semantic cache.", function: semanticCacheGet},
-        {name: "semanticCacheSet", description: "Stores data in the semantic cache.", function: semanticCacheSet},
-        {name: "processMedia", description: "Processes media files.", function: processMedia}
+    // Add functions from the current file (index.ts) to the tools
+    tools.push(
+        { name: "listRepos", description: "Lists your repositories.", function: safeToolCall(listRepos) },
+        { name: "getRepo", description: "Gets a specific repository.", function: safeToolCall(getRepo) },
+        { name: "listFiles", description: "Lists files in a repository.", function: safeToolCall(listFiles) },
+        { name: "readGithubFile", description: "Reads a file from Github.", function: safeToolCall(readGithubFile) },
+        { name: "createRepo", description: "Creates a new repository.", function: safeToolCall(createRepo) },
+        { name: "createFile", description: "Creates a new file in a repository.", function: safeToolCall(createFile) },
+        { name: "updateFile", description: "Updates a file in a repository.", function: safeToolCall(updateFile) },
+        { name: "deleteFile", description: "Deletes a file from a repository.", function: safeToolCall(deleteFile) },
+        { name: "createIssue", description: "Creates a new issue in a repository.", function: safeToolCall(createIssue) },
+        { name: "closeIssue", description: "Closes an issue in a repository.", function: safeToolCall(closeIssue) },
+        { name: "getWeather", description: "Gets the weather for a location.", function: safeToolCall(getWeather) },
+        { name: "getDateTime", description: "Gets the current date and time for a timezone.", function: safeToolCall(getDateTime) },
+        { name: "webSearch", description: "Performs a web search.", function: safeToolCall(webSearch) },
+        { name: "advancedCalculation", description: "Performs an advanced calculation.", function: safeToolCall(advancedCalculation) },
+        { name: "readFile", description: "Reads a file from the local filesystem.", function: safeToolCall(readFile) },
+        { name: "writeFile", description: "Writes a file to the local filesystem.", function: safeToolCall(writeFile) },
+        { name: "executeCode", description: "Executes code in a sandboxed environment.", function: safeToolCall(executeCode) },
+        { name: "generateImage", description: "Generates an image based on a text prompt.", function: safeToolCall(generateImage) },
+        { name: "sendEmail", description: "Sends an email.", function: safeToolCall(sendEmail) },
+        { name: "executeSqlQuery", description: "Executes an SQL query.", function: safeToolCall(executeSqlQuery) },
+        { name: "analyzeImage", description: "Analyzes an image.", function: safeToolCall(analyzeImage) },
+        { name: "scrapeWebsite", description: "Scrapes a website.", function: safeToolCall(scrapeWebsite) },
+        { name: "pdfManipulate", description: "Manipulates a PDF file.", function: safeToolCall(pdfManipulate) },
+        { name: "spreadsheetManipulate", description: "Manipulates a spreadsheet file.", function: safeToolCall(spreadsheetManipulate) },
+        { name: "addToVectorDB", description: "Adds content to a vector database.", function: safeToolCall(addToVectorDB) },
+        { name: "queryVectorDB", description: "Queries a vector database.", function: safeToolCall(queryVectorDB) },
+        { name: "semanticCacheGet", description: "Retrieves a value from the semantic cache.", function: safeToolCall(semanticCacheGet) },
+        { name: "semanticCacheSet", description: "Sets a value in the semantic cache.", function: safeToolCall(semanticCacheSet) },
+        { name: "processMedia", description: "Processes a media file.", function: safeToolCall(processMedia) }
     );
 
-    const config = {
-        tools,
-        responseMimeType: 'text/plain',
-        systemInstruction: [
-            {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets and process media. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets and can handle various types of media!`,        
-            }
-        ],
-    };
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-pro-latest', generation_config: { temperature: 0.7 } });
 
-    const model = 'gemini-2.0-flash';
-
-    const contents = [
-        {
-            role: 'user',
-            parts: [
-                {
-                    text: `INSERT_INPUT_HERE`, //e.g., What is the weather in London, UK? Or what time is it in Tokyo? What is the time compared to historic events? Generate an image of a cat wearing sunglasses. Send an email to test@example.com with the subject 'Test Email' and body 'This is a test email.' List my repos. What is the content of the index.ts file.
-                },
-            ],
+    const chat = model.startChat({
+        history: [],
+        generationConfig: {
+            temperature: 0.7,
         },
-    ];
-
-    const response = await ai.models.generateContentStream({
-        model,
-        config,
-        contents,
     });
 
-    for await (const chunk of response) {
-        if (chunk.functionCalls) {
-            const functionName = chunk.functionCalls[0].name;
-            const args = chunk.functionCalls[0].args;
+    let prompt = `You are RaidenNodeAgent, a versatile AI assistant designed to automate tasks across various domains such as data retrieval, file manipulation, and communication. You have access to a suite of tools that enable you to interact with GitHub, fetch weather information, perform web searches, execute code, generate images, send emails, and more. Your primary goal is to understand user requests and utilize the appropriate tools to fulfill those requests efficiently and accurately. When using a tool, you should always check if the response is an error, before proceeding. If there is an error, report it to the user, without trying to use other tools. If there is no error, continue the process with the next tool, to solve the user's request. Be very concise in your responses, without filler text. Use markdown formatting.`
 
-            // Find the tool based on the function name
-            const tool = tools.find(tool => tool.name === functionName);
+    // Start the chat session
+    while (true) {
+        // Prompt the user for input
+        const userInput = await new Promise((resolve) => {
+            process.stdout.write('Enter your request: ');
+            process.stdin.once('data', (data) => {
+                resolve(data.toString().trim());
+            });
+        });
 
-            if (tool) {
-                try {
-                    // Call the tool's function with the provided arguments
-                    const result = await tool.function(args); // Assuming all functions accept a single 'args' object
-                    console.log(result);
-                } catch (error) {
-                    console.error(`Error executing tool ${functionName}:`, error);
-                }
-            } else {
-                console.log(`Unknown function: ${functionName}`);
-            }
+        if (userInput.toLowerCase() === "exit") {
+            console.log("Exiting RaidenNodeAgent.");
+            break;
         }
-        else {
-            console.log(chunk.text);
+
+        // Send the user input to the model
+        const result = await chat.sendMessage(userInput, {
+            tools: tools.map(tool => ({
+                name: tool.name,
+                description: tool.description,
+                function: tool.function // Use the safeToolCall wrapped function
+            }))
+        });
+
+        // Log the tool calls
+        if (result.toolCalls) {
+            console.log("Tool calls:", result.toolCalls);
         }
+
+        const response = result.response;
+        console.log(response.text());
     }
 }
 
-main();
+// Helper function to wrap tool calls with error handling
+function safeToolCall(toolFunction: Function) {
+    return async function (...args: any) {
+        try {
+            console.log(`Tool "${toolFunction.name}" is running...`);
+            const result = await toolFunction(...args);
+            console.log(`Tool "${toolFunction.name}" result:`, result);
+            if (result && result.error) {
+                console.error(`Tool "${toolFunction.name}" reported an error:`, result.error);
+            }
+            return result;
+        } catch (error: any) {
+            console.error(`Error in tool "${toolFunction.name}":`, error);
+            return { error: `Tool "${toolFunction.name}" failed: ` + error.message };
+        }
+    };
+}
+
+main().catch(err => console.error("RaidenNodeAgent failed to start:", err));
