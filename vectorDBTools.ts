@@ -1,1 +1,121 @@
-import { Index } from \'@upstash/vector\';\nimport { Redis,  } from \'@upstash/redis\'\nimport { SemanticCache } from \"@upstash/semantic-cache\";\n\n// Load environment variables\nrequire(\'dotenv\').config();\n\nconst vectorRestUrl = process.env.UPSTASH_VECTOR_REST_URL;\nconst vectorRestToken = process.env.UPSTASH_VECTOR_REST_TOKEN\nconst hfApiKey = process.env.HUGGINGFACE_API_KEY\nconst redisRestUrl = process.env.UPSTASH_REDIS_REST_URL\nconst redisRestToken = process.env.UPSTASH_REDIS_REST_TOKEN\n\nif (!vectorRestUrl) {\n    throw new Error(\'UPSTASH_VECTOR_REST_URL is not set in .env file.\');\n}\nif (!vectorRestToken) {\n    throw new Error(\'UPSTASH_VECTOR_REST_TOKEN is not set in .env file.\');\n}\n\nif (!hfApiKey) {\n    throw new Error(\'HUGGINGFACE_API_KEY is not set in .env file.\');\n}\n\nif(!redisRestUrl){\n    throw new Error(\'UPSTASH_REDIS_REST_URL is not set in .env file.\');\n}\n\nif(!redisRestToken){\n    throw new Error(\'UPSTASH_REDIS_REST_TOKEN is not set in .env file.\');\n}\n\nconst index = new Index({\n    url: vectorRestUrl,\n    token: vectorRestToken,\n});\n\nconst redis = new Redis({\n    url: redisRestUrl,\n    token: redisRestToken,\n})\n\nconst semanticCache = new SemanticCache({\n    index: index,\n    redis: redis,\n    minProximity: 0.95\n});\n\n\nconst HUGGINGFACE_API_ENDPOINT = \"https://api-inference.huggingface.co/models/all-MiniLM-L6-v2\";\n\nasync function getEmbeddings(text: string): Promise<number[]> {\n    const response = await fetch(\n        HUGGINGFACE_API_ENDPOINT,\n        {\n            headers: {\n                Authorization: `Bearer ${hfApiKey}`,\n                \"Content-Type\": \"application/json\"\n            },\n            method: \"POST\",\n            body: JSON.stringify({\n                inputs: text,\n            }),\n        }\n    );\n\n    if (!response.ok) {\n        throw new Error(\`Failed to generate embeddings: ${response.status} ${response.statusText}\`);\n    }\n\n    const data = await response.json();\n    return data;\n}\n\n// Function to add text and its embedding to the Upstash Vector database\nexport async function addToVectorDB(text: string, vectorId: string): Promise<string> {\n    try {\n        const embedding = await getEmbeddings(text);\n        await index.upsert([{\n            id: vectorId,\n            vector: embedding,\n            metadata: {text: text}\n        }]);\n        return `Text added to vector DB successfully with id ${vectorId}`;\n    } catch (error: any) {\n        console.error(\'Error adding to vector DB:\', error);\n        return `Could not add to vector DB. ${error.message}`;\n    }\n}\n\n// Function to query the Upstash Vector database for similar entries\nexport async function queryVectorDB(query: string, topK: number): Promise<string> {\n    try {\n        const embedding = await getEmbeddings(query);\n        const results = await index.query({\n            vector: embedding,\n            topK: topK,\n            includeMetadata: true,\n        });\n        return `Query results: ${JSON.stringify(results)}`;\n    } catch (error: any) {\n        console.error(\'Error querying vector DB:\', error);\n        return `Could not query vector DB. ${error.message}`;\n    }\n}\n\nexport async function semanticCacheGet(key: string): Promise<string> {\n    try{\n        const res = await semanticCache.get(key)\n        return `Semantic cache get: ${JSON.stringify(res)}`\n    }catch(e:any){\n        return `Semantic cache get failed: ${e.message}`\n    }\n\n}\n\nexport async function semanticCacheSet(key: string, value:string): Promise<string> {\n    try{\n        await semanticCache.set(key, value)\n        return `Semantic cache set success`\n    }catch(e:any){\n        return `Semantic cache set failed: ${e.message}`\n    }\n}
+import { Index } from '@upstash/vector';
+import { Redis } from '@upstash/redis'
+import { SemanticCache } from "@upstash/semantic-cache";
+
+// Load environment variables
+require('dotenv').config();
+
+const vectorRestUrl = process.env.UPSTASH_VECTOR_REST_URL;
+const vectorRestToken = process.env.UPSTASH_VECTOR_REST_TOKEN
+const hfApiKey = process.env.HUGGINGFACE_API_KEY
+const redisRestUrl = process.env.UPSTASH_REDIS_REST_URL
+const redisRestToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+if (!vectorRestUrl) {
+    throw new Error('UPSTASH_VECTOR_REST_URL is not set in .env file.');
+}
+if (!vectorRestToken) {
+    throw new Error('UPSTASH_VECTOR_REST_TOKEN is not set in .env file.');
+}
+if (!hfApiKey) {
+    throw new Error('HUGGINGFACE_API_KEY is not set in .env file.');
+}
+if(!redisRestUrl){
+    throw new Error('UPSTASH_REDIS_REST_URL is not set in .env file.');
+}
+if(!redisRestToken){
+    throw new Error('UPSTASH_REDIS_REST_TOKEN is not set in .env file.');
+}
+
+const index = new Index({
+    url: vectorRestUrl,
+    token: vectorRestToken,
+});
+
+const redis = new Redis({
+    url: redisRestUrl,
+    token: redisRestToken,
+})
+
+const semanticCache = new SemanticCache({
+    index: index,
+    redis: redis,
+    minProximity: 0.95,
+});
+
+
+const HUGGINGFACE_API_ENDPOINT = "https://api-inference.huggingface.co/models/all-MiniLM-L6-v2";
+
+async function getEmbeddings(text: string): Promise<number[]> {
+    const response = await fetch(
+        HUGGINGFACE_API_ENDPOINT,
+        {
+            headers: {
+                Authorization: `Bearer ${hfApiKey}`,
+                "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify({
+                inputs: text,
+            }),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to generate embeddings: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+// Function to add text and its embedding to the Upstash Vector database
+export async function addToVectorDB(text: string, vectorId: string): Promise<string> {
+    try {
+        const embedding = await getEmbeddings(text);
+        await index.upsert([{
+            id: vectorId,
+            vector: embedding,
+            metadata: {text: text}
+        }]);
+        return `Text added to vector DB successfully with id ${vectorId}`;
+    } catch (error: any) {
+        console.error('Error adding to vector DB:', error);
+        return `Could not add to vector DB. ${error.message}`;
+    }
+}
+
+// Function to query the Upstash Vector database for similar entries
+export async function queryVectorDB(query: string, topK: number): Promise<string> {
+    try {
+        const embedding = await getEmbeddings(query);
+        const results = await index.query({
+            vector: embedding,
+            topK: topK,
+            includeMetadata: true,
+        });
+        return `Query results: ${JSON.stringify(results)}`;
+    } catch (error: any) {
+        console.error('Error querying vector DB:', error);
+        return `Could not query vector DB. ${error.message}`;
+    }
+}
+
+export async function semanticCacheGet(key: string): Promise<string> {
+    try{
+        const res = await semanticCache.get(key)
+        return `Semantic cache get: ${JSON.stringify(res)}`
+    }catch(e:any){
+        return `Semantic cache get failed: ${e.message}`
+    }
+
+}
+
+export async function semanticCacheSet(key: string, value:string): Promise<string> {
+    try{
+        await semanticCache.set(key, value)
+        return `Semantic cache set success`
+    }catch(e:any){
+        return `Semantic cache set failed: ${e.message}`
+    }
+}
