@@ -23,6 +23,7 @@
     "zod": "*",
     "@stdlib/stdlib": "*",
     "nodemailer": "*",
-    "@octokit/rest": "*"
+    "@octokit/rest": "*",
+    "sqlite3": "*"
   }
 }
