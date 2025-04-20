@@ -14,6 +14,7 @@ import { generateImage } from './imageGenerationTools';
 import { sendEmail } from './emailTools';
 import { tools } from './toolsConfig';
 import { executeSqlQuery } from './sqlQueryTools'
+import { analyzeImage } from './imageRecognitionTools'
 
 // Load environment variables
 require('dotenv').config();
@@ -37,7 +38,7 @@ async function main() {
         responseMimeType: 'text/plain',
         systemInstruction: [
             {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, and interact with GitHub. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries!`,        
+                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images!`,        
             }
         ],
     };
@@ -173,6 +174,11 @@ async function main() {
                 const query = args.query;
                 const queryResult = await executeSqlQuery(databasePath, query);
                 console.log(queryResult);
+            }  else if (functionName === 'analyzeImage') {
+                const imagePath = args.imagePath
+                const features = args.features
+                const imageResult = await analyzeImage(imagePath, features)
+                console.log(imageResult)
             } else {
                 console.log(`Unknown function: ${functionName}`);
             }
