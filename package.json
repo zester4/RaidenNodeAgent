@@ -26,6 +26,7 @@
     "@octokit/rest": "*",
     "sqlite3": "*",
     "aws-sdk": "*",
-    "@mendable/firecrawl-js": "*"
+    "@mendable/firecrawl-js": "*",
+    "pdf-lib": "*"
   }
 }
