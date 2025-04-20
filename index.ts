@@ -16,6 +16,7 @@ import { tools } from './toolsConfig';
 import { executeSqlQuery } from './sqlQueryTools'
 import { analyzeImage } from './imageRecognitionTools'
 import { scrapeWebsite } from './webScrapingTools'
+import { pdfManipulate } from './pdfTools'
 
 // Load environment variables
 require('dotenv').config();
@@ -39,7 +40,7 @@ async function main() {
         responseMimeType: 'text/plain',
         systemInstruction: [
             {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites!`,        
+                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites and manipulate pdfs. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs!`,        
             }
         ],
     };
@@ -122,7 +123,7 @@ async function main() {
                 const path = args.path;
                 const fileList = await listFiles(owner, repo, path);
                 console.log(fileList);
-            } else if (functionName === 'readFile') {
+            } else if (functionName === 'readGithubFile') {
                 const owner = args.owner;
                 const repo = args.repo;
                 const path = args.path;
@@ -185,7 +186,13 @@ async function main() {
                 const type = args.type
                 const scrapeResult = await scrapeWebsite(url, type)
                 console.log(scrapeResult)
-            } else {
+            } else if (functionName === 'pdfManipulate') {
+                const operation = args.operation
+                const filePath = args.filePath
+                const text = args.text
+                const pdfResult = await pdfManipulate(operation, filePath, text)
+                console.log(pdfResult)
+            }else {
                 console.log(`Unknown function: ${functionName}`);
             }
         }
