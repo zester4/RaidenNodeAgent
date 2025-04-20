@@ -24,6 +24,7 @@
     "@stdlib/stdlib": "*",
     "nodemailer": "*",
     "@octokit/rest": "*",
-    "sqlite3": "*"
+    "sqlite3": "*",
+    "aws-sdk": "*"
   }
 }
