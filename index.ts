@@ -43,11 +43,37 @@ async function main() {
      const toolsDir = path.join(__dirname, 'tools');
      const toolFiles = fs.readdirSync(toolsDir).filter(file => file.endsWith('.ts'));
 
-     const tools = [];
-     for (const file of toolFiles) {
-         const toolConfig = await import(path.join(toolsDir, file));
-         tools.push(toolConfig.default);
-     }
+    const tools = [
+        {name: "listRepos", description: "Lists your repositories.", function: listRepos},
+        {name: "getRepo", description: "Gets a specific repository.", function: getRepo},
+        {name: "listFiles", description: "Lists files in a repository.", function: listFiles},
+        {name: "readGithubFile", description: "Reads a file from Github.", function: readGithubFile},
+        {name: "createRepo", description: "Creates a new repository.", function: createRepo},
+        {name: "createFile", description: "Creates a new file in a repository.", function: createFile},
+        {name: "updateFile", description: "Updates a file in a repository.", function: updateFile},
+        {name: "deleteFile", description: "Deletes a file from a repository.", function: deleteFile},
+        {name: "createIssue", description: "Creates a new issue in a repository.", function: createIssue},
+        {name: "closeIssue", description: "Closes an issue in a repository.", function: closeIssue},
+        {name: "getWeather", description: "Gets the weather for a location.", function: getWeather},
+        {name: "getDateTime", description: "Gets the current date and time for a timezone.", function: getDateTime},
+        {name: "webSearch", description: "Performs a web search.", function: webSearch},
+        {name: "advancedCalculation", description: "Performs an advanced calculation.", function: advancedCalculation},
+        {name: "readFile", description: "Reads a file from the file system.", function: readFile},
+        {name: "writeFile", description: "Writes a file to the file system.", function: writeFile},
+        {name: "executeCode", description: "Executes code.", function: executeCode},
+        {name: "generateImage", description: "Generates an image based on a prompt.", function: generateImage},
+        {name: "sendEmail", description: "Sends an email.", function: sendEmail},
+        {name: "executeSqlQuery", description: "Executes an SQL query.", function: executeSqlQuery},
+        {name: "analyzeImage", description: "Analyzes an image.", function: analyzeImage},
+        {name: "scrapeWebsite", description: "Scrapes a website.", function: scrapeWebsite},
+        {name: "pdfManipulate", description: "Manipulates a PDF file.", function: pdfManipulate},
+        {name: "spreadsheetManipulate", description: "Manipulates a spreadsheet.", function: spreadsheetManipulate},
+        {name: "addToVectorDB", description: "Adds text to the vector database.", function: addToVectorDB},
+        {name: "queryVectorDB", description: "Queries the vector database.", function: queryVectorDB},
+        {name: "semanticCacheGet", description: "Retrieves data from the semantic cache.", function: semanticCacheGet},
+        {name: "semanticCacheSet", description: "Stores data in the semantic cache.", function: semanticCacheSet},
+        {name: "processMedia", description: "Processes media files.", function: processMedia}
+    ];
 
     const config = {
         tools,
@@ -83,158 +109,17 @@ async function main() {
             const functionName = chunk.functionCalls[0].name;
             const args = chunk.functionCalls[0].args;
 
-            if (functionName === 'getWeather') {
-                const location = args.location;
-                const weather = await getWeather(location);
-                console.log(weather);
-            } else if (functionName === 'getDateTime') {
-                const timezone = args.timezone;
-                const dateTime = await getDateTime(timezone);
-                console.log(dateTime);
-            } else if (functionName === 'webSearch') {
-                const query = args.query;
-                const searchResults = await webSearch(query);
-                console.log(searchResults);
-            } else if (functionName === 'advancedCalculation') {
-                const expression = args.expression;
-                const calculationResult = await advancedCalculation(expression);
-                console.log(calculationResult);
-            } else if (functionName === 'readFile') {
-                const filePath = args.filePath;
-                const fileContents = await readFile(filePath);
-                console.log(fileContents);
-            } else if (functionName === 'writeFile') {
-                const filePath = args.filePath;
-                const content = args.content;
-                const writeResult = await writeFile(filePath, content);
-                console.log(writeResult);
-            } else if (functionName === 'executeCode') {
-                const code = args.code;
-                const executionResult = await executeCode(code);
-                console.log(executionResult);
-            } else if (functionName === 'generateImage') {
-                const prompt = args.prompt;
-                const imageResult = await generateImage(prompt);
-                console.log(imageResult)
-            } else if (functionName === 'sendEmail') {
-                const to = args.to;
-                const subject = args.subject;
-                const body = args.body;
-                const emailResult = await sendEmail(to, subject, body);
-                console.log(emailResult);
-            } else if (functionName === 'listRepos') {
-                const username = args.username;
-                const repoList = await listRepos(username);
-                console.log(repoList);
-            } else if (functionName === 'getRepo') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const repoInfo = await getRepo(owner, repo);
-                console.log(repoInfo);
-            } else if (functionName === 'listFiles') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const path = args.path;
-                const fileList = await listFiles(owner, repo, path);
-                console.log(fileList);
-            } else if (functionName === 'readGithubFile') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const path = args.path;
-                const fileContent = await readGithubFile(owner, repo, path);
-                console.log(fileContent);
-            } else if (functionName === 'createRepo') {
-                const name = args.name;
-                const description = args.description;
-                const privateRepo = args.privateRepo;
-                const creationResult = await createRepo(name, description, privateRepo);
-                console.log(creationResult);
-            } else if (functionName === 'createFile') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const path = args.path;
-                const content = args.content;
-                const message = args.message;
-                const creationResult = await createFile(owner, repo, path, content, message);
-                console.log(creationResult);
-            } else if (functionName === 'updateFile') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const path = args.path;
-                const content = args.content;
-                const message = args.message;
-                const updateResult = await updateFile(owner, repo, path, content, message);
-                console.log(updateResult);
-            } else if (functionName === 'deleteFile') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const path = args.path;
-                const message = args.message;
-                const deletionResult = await deleteFile(owner, repo, path, message);
-                console.log(deletionResult);
-            } else if (functionName === 'createIssue') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const title = args.title;
-                const body = args.body;
-                const creationResult = await createIssue(owner, repo, title, body);
-                console.log(creationResult);
-            }  else if (functionName === 'closeIssue') {
-                const owner = args.owner;
-                const repo = args.repo;
-                const issueNumber = args.issueNumber;
-                const closingResult = await closeIssue(owner, repo, issueNumber);
-                console.log(closingResult);
-            } else if (functionName === 'executeSqlQuery') {
-                const databasePath = args.databasePath;
-                const query = args.query;
-                const queryResult = await executeSqlQuery(databasePath, query);
-                console.log(queryResult);
-            }  else if (functionName === 'analyzeImage') {
-                const imagePath = args.imagePath
-                const features = args.features
-                const imageResult = await analyzeImage(imagePath, features)
-                console.log(imageResult)
-            } else if (functionName === 'scrapeWebsite') {
-                const url = args.url
-                const type = args.type
-                const scrapeResult = await scrapeWebsite(url, type)
-                console.log(scrapeResult)
-            } else if (functionName === 'pdfManipulate') {
-                const operation = args.operation
-                const filePath = args.filePath
-                const text = args.text
-                const pdfResult = await pdfManipulate(operation, filePath, text)
-                console.log(pdfResult)
-            } else if (functionName === 'spreadsheetManipulate') {
-                const operation = args.operation
-                const filePath = args.filePath
-                const data = args.data
-                const spreadsheetResult = await spreadsheetManipulate(operation, filePath, data)
-                console.log(spreadsheetResult)
-            } else if (functionName === 'addToVectorDB') {
-                const text = args.text
-                const vectorId = args.vectorId
-                const addResult = await addToVectorDB(text, vectorId)
-                console.log(addResult)
-            } else if (functionName === 'queryVectorDB') {
-                const query = args.query
-                const topK = args.topK
-                const queryResult = await queryVectorDB(query, topK)
-                console.log(queryResult)
-             } else if (functionName === 'semanticCacheGet') {
-                const key = args.key
-                const getResult = await semanticCacheGet(key)
-                console.log(getResult)
-            } else if (functionName === 'semanticCacheSet') {
-                const key = args.key
-                const value = args.value
-                const setResult = await semanticCacheSet(key, value)
-                console.log(setResult)
-            } else if (functionName === 'processMedia') {
-                const filePath = args.filePath
-                const mediaResult = await processMedia(filePath)
-                console.log(mediaResult)
+            // Find the tool based on the function name
+            const tool = tools.find(tool => tool.name === functionName);
+
+            if (tool) {
+                try {
+                    // Call the tool's function with the provided arguments
+                    const result = await tool.function(args); // Assuming all functions accept a single 'args' object
+                    console.log(result);
+                } catch (error) {
+                    console.error(`Error executing tool ${functionName}:`, error);
+                }
             } else {
                 console.log(`Unknown function: ${functionName}`);
             }
