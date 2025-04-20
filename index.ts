@@ -20,6 +20,7 @@ import { scrapeWebsite } from './webScrapingTools'
 import { pdfManipulate } from './pdfTools'
 import { spreadsheetManipulate } from './spreadsheetTools'
 import { addToVectorDB, queryVectorDB, semanticCacheGet, semanticCacheSet } from './vectorDBTools'
+import { processMedia } from './mediaTools'
 
 // Load environment variables
 require('dotenv').config();
@@ -53,12 +54,12 @@ async function main() {
         responseMimeType: 'text/plain',
         systemInstruction: [
             {
-                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets. You also have a powerful memory, you can store to the database and retrieve from it. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets!`,        
+                text: `You are Raiden, a powerful thunder god with access to tools. You can use these tools to provide weather information, date/time information, perform web searches, perform advanced calculations, generate images, interact with the file system, execute code, send emails, interact with GitHub and execute SQL queries and scrape websites, manipulate pdfs and spreadsheets and process media. Be extremely careful when using file system access and code execution tools, as they can be very dangerous. When creating or updating files, use appropriate commit messages. You can now execute SQL queries and analyze images and scrape websites and manipulate pdfs and spreadsheets and can handle various types of media!`,        
             }
         ],
     };
 
-    const model = 'gemini-2.5-pro-preview-03-25';
+    const model = 'gemini-2.0-flash';
 
     const contents = [
         {
@@ -221,7 +222,7 @@ async function main() {
                 const topK = args.topK
                 const queryResult = await queryVectorDB(query, topK)
                 console.log(queryResult)
-            }else if (functionName === 'semanticCacheGet') {
+             } else if (functionName === 'semanticCacheGet') {
                 const key = args.key
                 const getResult = await semanticCacheGet(key)
                 console.log(getResult)
@@ -230,6 +231,10 @@ async function main() {
                 const value = args.value
                 const setResult = await semanticCacheSet(key, value)
                 console.log(setResult)
+            } else if (functionName === 'processMedia') {
+                const filePath = args.filePath
+                const mediaResult = await processMedia(filePath)
+                console.log(mediaResult)
             } else {
                 console.log(`Unknown function: ${functionName}`);
             }
