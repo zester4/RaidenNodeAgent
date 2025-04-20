@@ -2,10 +2,25 @@
   "name": "raiden-node-agent",
   "version": "1.0.0",
   "description": "Node.js-based AI agent for business automation",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "ts-node index.ts"
   },
   "author": "Raiden Agents",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "*",
+    "ts-node": "*",
+    "typescript": "*"
+  },
+  "dependencies": {
+    "@google/generative-ai": "*",
+    "mime": "*",
+    "dotenv": "*",
+    "date-fns": "*",
+    "node-fetch": "*",
+    "zod": "*",
+    "@stdlib/stdlib": "*"
+  }
 }
