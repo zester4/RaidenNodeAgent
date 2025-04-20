@@ -25,6 +25,7 @@
     "nodemailer": "*",
     "@octokit/rest": "*",
     "sqlite3": "*",
-    "aws-sdk": "*"
+    "aws-sdk": "*",
+    "@mendable/firecrawl-js": "*"
   }
 }
