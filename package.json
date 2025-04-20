@@ -27,6 +27,8 @@
     "sqlite3": "*",
     "aws-sdk": "*",
     "@mendable/firecrawl-js": "*",
-    "pdf-lib": "*"
+    "pdf-lib": "*",
+    "csv-parser": "*",
+    "csv-stringify": "*"
   }
 }
